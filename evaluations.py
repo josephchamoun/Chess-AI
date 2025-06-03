@@ -116,7 +116,7 @@ class MinMax:
             if file_count > 1:
                 score -= 0.5 * (file_count - 1)  
         
-        # Evaluate isolated pawns
+        #isolated pawns
         for file in range(8):
             if files[file] > 0:
                 has_neighbor = False
@@ -128,7 +128,7 @@ class MinMax:
                 if not has_neighbor:
                     score -= 0.5 * files[file]  
         
-        # Evaluate pawn chains (pawns protecting each other diagonally)
+        #(pawns protecting each other diagonally)
         for square in pawns:
             file = chess.square_file(square)
             rank = chess.square_rank(square)
@@ -141,7 +141,7 @@ class MinMax:
                         protector_square = chess.square(file + file_offset, protector_rank)
                         protector = board.piece_at(protector_square)
                         if protector and protector.piece_type == chess.PAWN and protector.color == color:
-                            score += 0.2 # Bonus for a pawn chain connection
+                            score += 0.2 
         
         return score
 
@@ -159,7 +159,7 @@ class MinMax:
         pawn_shield_score = 0
         for file_offset in [-1, 0, 1]:
             pawn_file = file + file_offset
-            # Check squares one rank in front of the king
+            
             pawn_rank_front = rank + direction
             if 0 <= pawn_file <= 7 and 0 <= pawn_rank_front <= 7:
                 square_front = chess.square(pawn_file, pawn_rank_front)
@@ -319,11 +319,11 @@ class MinMax:
                         is_open_file = False
                         break
                 if is_open_file:
-                    score += direction_factor * 0.4 # Bonus for an open file
+                    score += direction_factor * 0.4 
 
                 # Check for semi-open files (opponent pawns only)
                 is_semi_open_file = False
-                if not is_open_file: # Only check if not fully open
+                if not is_open_file: 
                     is_semi_open_file = True
                     for rank_idx in range(8):
                         pawn_at_file = board.piece_at(chess.square(rook_file, rank_idx))
@@ -333,7 +333,7 @@ class MinMax:
                     if is_semi_open_file:
                         score += direction_factor * 0.2 # Bonus for a semi-open file
 
-                # Penalty if rook is blocked by own pawns on its file
+                #if rook is blocked by own pawns on its file
                 for pawn_square in pawns:
                     if chess.square_file(pawn_square) == rook_file:
                         if color == chess.WHITE and chess.square_rank(pawn_square) > rook_rank:
@@ -343,34 +343,29 @@ class MinMax:
         return score
 
     def evaluate_mobility(self, board):
-        """
-        Evaluates piece mobility - how many legal moves each piece has
-        Higher mobility generally means better piece positioning
-        """
+
         white_mobility = 0
         black_mobility = 0
         
-        # Store original turn to restore it later
+      
         original_turn = board.turn
         
-        # Calculate white mobility
+        
         board.turn = chess.WHITE
         white_mobility = len(list(board.legal_moves))
         
-        # Calculate black mobility
+        
         board.turn = chess.BLACK
         black_mobility = len(list(board.legal_moves))
         
-        # Restore original turn
+        
         board.turn = original_turn
         
-        # Return mobility difference (positive favors white)
+        
         return 0.05 * (white_mobility - black_mobility)
 
     def evaluate_center_control(self, board):
-        """
-        Evaluates control of the center of the board
-        """
+
         score = 0
         center_squares = [chess.D4, chess.E4, chess.D5, chess.E5]
         extended_center = [chess.C3, chess.D3, chess.E3, chess.F3, 
@@ -378,7 +373,7 @@ class MinMax:
                            chess.C5, chess.F5, 
                            chess.C6, chess.D6, chess.E6, chess.F6]
         
-        # directly
+
         for square in center_squares:
             piece = board.piece_at(square)
             if piece:
@@ -388,13 +383,13 @@ class MinMax:
                 else:
                     score -= value
         
-        # Attacking/controlling center squares
+
         for square in center_squares:
             white_attackers = len(board.attackers(chess.WHITE, square))
             black_attackers = len(board.attackers(chess.BLACK, square))
             score += 0.1 * (white_attackers - black_attackers)
         
-        # Extended center control (with less weight)
+
         for square in extended_center:
             white_attackers = len(board.attackers(chess.WHITE, square))
             black_attackers = len(board.attackers(chess.BLACK, square))
@@ -427,8 +422,6 @@ class MinMax:
                             if not defenders:
                                 score += factor * value * 0.5  # Attack on undefended piece
                             else:
-                                # Consider value of attacking piece vs. defending piece for more depth
-                                # For simplicity, keeping original logic, but this is an area for improvement
                                 score += factor * value * 0.2  # Pressure on defended piece
             return score
 
@@ -451,22 +444,22 @@ class MinMax:
                 else:
                     score -= value
 
-        # 2. Pawn Structure
+        
         score += self.evaluate_pawn_structure(board, chess.WHITE) * 0.8
         score -= self.evaluate_pawn_structure(board, chess.BLACK) * 0.8
         
-        # 3. Mobility
-        score += self.evaluate_mobility(board) * 0.1 # Small weight, but important
+       
+        score += self.evaluate_mobility(board) * 0.1 
 
-        # 4. Center Control
-        score += self.evaluate_center_control(board) * 0.7 # Significant for middlegame
+       
+        score += self.evaluate_center_control(board) * 0.7 
 
-        # 5. King Safety (phase-dependent)
+        
         if game_phase == "Opening" or game_phase == "Middlegame":
             score += self.evaluate_king_safety_combined(board, chess.WHITE) * 1.5 
             score -= self.evaluate_king_safety_combined(board, chess.BLACK) * 1.5
         elif game_phase == "Endgame":
-            # King activity becomes more important in the endgame
+            
             white_king_square = board.king(chess.WHITE)
             black_king_square = board.king(chess.BLACK)
             if white_king_square:
@@ -474,9 +467,9 @@ class MinMax:
             if black_king_square:
                 score -= self.evaluate_king_activity(black_king_square) * 0.5
 
-        # 6. Piece Deployment and Activity (phase-dependent)
+        
         if game_phase == "Opening":
-            score += self.evaluate_pieces_deployment(board) * 1.0 # Includes general development and bishop blocking
+            score += self.evaluate_pieces_deployment(board) * 1.0 
             
             for square in [chess.E4, chess.D4]:
                 piece = board.piece_at(square)
@@ -488,24 +481,24 @@ class MinMax:
                     score -= 0.5
 
         elif game_phase == "Middlegame":
-            # Encourage knights to central outposts
+            
             score += self.middle_game_knight_deployement(board) * 0.7
-            # Connected Rooks
+           
             score += self.check_connected_rooks(board, chess.WHITE) * 0.4
             score -= self.check_connected_rooks(board, chess.BLACK) * 0.4
-            # Rook Movement (penalize blocked rooks and bonus for open files)
+            
             score += self.evaluate_rook_movement(board) * 0.3
             
         elif game_phase == "Endgame":
-            # Passed Pawns are crucial in the endgame
-            score += self.evaluate_passed_pawns(board, chess.WHITE) * 2.0 # Increased weight for endgame
+            
+            score += self.evaluate_passed_pawns(board, chess.WHITE) * 2.0 
             score -= self.evaluate_passed_pawns(board, chess.BLACK) * 2.0
 
-            # Pawns closer to promotion are more valuable
-            score += self.close_pawns_to_promote(board) * 1.5 # Significant in endgame
+            
+            score += self.close_pawns_to_promote(board) * 1.5 
 
-        # 7. Attacks and Pressure
-        score += self.evaluate_attacks(board) * 0.6 # Moderate weight for attacks
+        
+        score += self.evaluate_attacks(board) * 0.6 
 
         return score
     

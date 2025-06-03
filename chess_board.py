@@ -186,23 +186,23 @@ def main():
             check_square = game.get_king_square(game.board.turn)
             highlight_square(check_square, CHECK_HIGHLIGHT)
         
-        # Highlight selected square
+       
         if selected_square is not None:
             highlight_square(selected_square, HIGHLIGHT_SELECTED)
-            # Highlight legal moves
+            
             for move in legal_moves_for_selected:
                 target_square = move.to_square
                 is_capture = game.get_piece_at(target_square) is not None # Check if target square has a piece
                 highlight_legal_move(target_square, is_capture)
 
-        # Draw info panel elements
+        
         draw_turn_info(game)
-        game_score(game) # Now draws in the new position
+        game_score(game) 
 
         pygame.display.flip()
-        clock.tick(60) # Cap frame rate at 60 FPS
+        clock.tick(60) 
 
-        # Event handling
+      
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -220,25 +220,25 @@ def main():
                             move for move in game.board.legal_moves if move.from_square == selected_square
                         ]
                 else:
-                    # A square is already selected, try to make a move
+                 
                     move_made = False
                     for move in legal_moves_for_selected:
                         if move.from_square == selected_square and move.to_square == square:
-                            if game.try_move(selected_square, square): # try_move handles promotion
+                            if game.try_move(selected_square, square): 
                                 move_made = True
                                 break
                     
-                    if not move_made: # If the attempted move was not legal or tried to pick up new piece
-                        # If clicking on a different piece of the same color, re-select
+                    if not move_made: 
+                    
                         if piece and piece.color == game.board.turn:
                             selected_square = square
                             legal_moves_for_selected = [
                                 move for move in game.board.legal_moves if move.from_square == selected_square
                             ]
-                        else: # Deselect if clicking an empty square or opponent's piece
+                        else: 
                             selected_square = None
                             legal_moves_for_selected = []
-                    else: # Move was successfully made
+                    else: 
                         selected_square = None
                         legal_moves_for_selected = []
 

@@ -161,19 +161,18 @@ def get_square(pos):
     row = 7 - (y // SQUARE_SIZE)
     return chess.square(col, row)
 
-# --- Main Game Loop ---
 def main():
     game = ChessGame()
     clock = pygame.time.Clock()
     running = True
     selected_square = None
-    legal_moves_for_selected = [] # Store chess.Move objects
+    legal_moves_for_selected = [] 
 
-    AI_DEPTH = 4 # Define AI search depth here
-    PLAYER_COLOR = chess.BLACK # Player controls Black pieces
+    AI_DEPTH = 4 
+    PLAYER_COLOR = chess.BLACK 
 
     while running:
-        # Check for game over
+      
         if game.is_game_over():
             result = game.get_result()
             display_message("Game Over! " + result, result)
@@ -181,18 +180,18 @@ def main():
             game.reset()
             selected_square = None
             legal_moves_for_selected = []
-            continue # Skip drawing and event handling for a moment after reset
+            continue 
 
-        # Drawing sequence
-        screen.fill(INFO_PANEL_BG) # Fill background with info panel color
+        
+        screen.fill(INFO_PANEL_BG) 
         draw_board(game)
 
-        # Highlight king if in check
+        
         if game.is_check():
             check_square = game.get_king_square(game.board.turn)
             highlight_square(check_square, CHECK_HIGHLIGHT)
         
-        # Highlight selected square and legal moves
+    
         if selected_square is not None:
             highlight_square(selected_square, HIGHLIGHT_SELECTED)
             for move in legal_moves_for_selected:
@@ -200,68 +199,68 @@ def main():
                 is_capture = game.get_piece_at(target_square) is not None
                 highlight_legal_move(target_square, is_capture)
 
-        draw_info_panel(game) # Draws score, turn, and phase
+        draw_info_panel(game)
         pygame.display.flip()
         clock.tick(60)
 
         # --- AI Turn ---
-        if game.board.turn != PLAYER_COLOR: # If it's not the player's turn (i.e., AI's turn)
-            pygame.time.wait(500) # Optional delay for realism (adjust as needed)
-            print("AI is thinking...") # Debug print
+        if game.board.turn != PLAYER_COLOR: 
+            pygame.time.wait(500)
+            print("AI is thinking...") 
             best_move = find_best_move(game.board, AI_DEPTH)
             if best_move:
-                print(f"AI makes move: {best_move.uci()}") # Debug print
-                # FIX: Call try_move without the 'promotion' keyword argument
+                print(f"AI makes move: {best_move.uci()}") 
+                
                 game.try_move(best_move.from_square, best_move.to_square)
-            # Reset selection after AI move
+           
             selected_square = None
             legal_moves_for_selected = []
-            continue # Skip player input handling for this frame
+            continue 
 
-        # --- Player Input Handling ---
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Ensure clicks are within the board area
+               
                 mouse_y = pygame.mouse.get_pos()[1]
-                if mouse_y >= WIDTH: # Clicked in info panel, ignore for moves
+                if mouse_y >= WIDTH: 
                     continue 
 
                 square = get_square(pygame.mouse.get_pos())
                 piece = game.get_piece_at(square)
 
                 if selected_square is None:
-                    # No square selected, try to select a piece of the player's color
+            
                     if piece and piece.color == PLAYER_COLOR:
                         selected_square = square
-                        # Get legal moves for the selected piece
+                
                         legal_moves_for_selected = [
                             move for move in game.board.legal_moves if move.from_square == selected_square
                         ]
                 else:
-                    # A square is already selected, try to make a move
+               
                     move_made = False
                     for move in legal_moves_for_selected:
                         if move.from_square == selected_square and move.to_square == square:
-                            # FIX: Call try_move without the 'promotion' keyword argument
+                       
                             if game.try_move(move.from_square, move.to_square):
                                 move_made = True
                                 break
                     
                     if not move_made:
-                        # If the attempted move was not legal for the selected piece
-                        # OR if the player clicked a different piece of their own color
+                 
+                
                         if piece and piece.color == PLAYER_COLOR:
-                            selected_square = square # Select the new piece
+                            selected_square = square 
                             legal_moves_for_selected = [
                                 move for move in game.board.legal_moves if move.from_square == selected_square
                             ]
-                        else: # Deselect if clicking an empty square or opponent's piece
+                        else: 
                             selected_square = None
                             legal_moves_for_selected = []
-                    else: # Move was successfully made
+                    else:
                         selected_square = None
                         legal_moves_for_selected = []
 

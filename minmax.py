@@ -17,7 +17,7 @@ def minimax(board, depth, alpha, beta, is_maximizing):
             max_eval = max(max_eval, eval)
             alpha = max(alpha, eval)
             if beta <= alpha:
-                break  # Beta cut-off
+                break  
         return max_eval
     else:
         min_eval = float('inf')
@@ -28,7 +28,7 @@ def minimax(board, depth, alpha, beta, is_maximizing):
             min_eval = min(min_eval, eval)
             beta = min(beta, eval)
             if beta <= alpha:
-                break  # Alpha cut-off
+                break  
         return min_eval
 
 
@@ -67,7 +67,7 @@ def minimax2(board, depth, alpha, beta, is_maximizing):
             max_eval = max(max_eval, eval)
             alpha = max(alpha, eval)
             if beta <= alpha:
-                break  # Beta cut-off
+                break  
         return max_eval
     else:
         min_eval = float('inf')
@@ -78,7 +78,7 @@ def minimax2(board, depth, alpha, beta, is_maximizing):
             min_eval = min(min_eval, eval)
             beta = min(beta, eval)
             if beta <= alpha:
-                break  # Alpha cut-off
+                break  
         return min_eval
 
 

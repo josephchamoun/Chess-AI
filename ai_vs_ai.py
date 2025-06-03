@@ -161,7 +161,7 @@ def get_square(pos):
     row = 7 - (y // SQUARE_SIZE)
     return chess.square(col, row)
 
-# --- Main Game Loop ---
+
 def main():
     game = ChessGame()
     clock = pygame.time.Clock()
